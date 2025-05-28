@@ -1,0 +1,143 @@
+{% load datatable_tags %}
+{% load static %}
+
+<!-- htmx -->
+<script src="{% static 'htmx/htmx.min.js' %}"></script>
+
+<!-- DataTables core -->
+<link href="{% static 'datatables/datatables.css' %}" rel="stylesheet">
+<script src="{% static 'datatables/datatables.js'%}"></script>
+
+<div class="custom-datatable-scope">
+    <div class="table-responsive">
+        <table id="{{ table_id }}" class="table card-table table-vcenter text-nowrap datatable table-striped" style="width:100%">
+            <thead>
+                <tr class="table-primary">
+                    {% if columns %}
+                        {% for columna in columns %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                        {% if button_url %}
+                            <th></th>
+                        {% endif %}
+                    {% else %}
+                        <th><h6>No hay columnas</h6></th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for datos in data %}
+                    <tr>
+                        {% for key, value in datos.items %}
+                            {% if key not in hidden %}
+                                <td class="fw-normal">{{ value|default_if_none:"-Sin Datos-" }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if button_url %}
+                            <td>
+                                {% if button_dropdown %}
+                                    <div class="dropdown">
+                                        <a href="#" class="btn btn-primary float-end dropdown-toggle" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical"></i>Acciones</a>
+                                        <div class="dropdown-menu">
+                                            {% for title, elements in button_url.items %}
+                                                {% for type, url_data in elements.items %}
+                                                    {% if type == "modal" %}
+                                                        <a class="dropdown-item" hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target='#content_modal' hx-trigger='click' data-bs-toggle='modal' data-bs-target='#general_modal'>{{ title }}</a>
+                                                    {% elif type == "link" %}
+                                                        <a class="dropdown-item" href="{% dt_reverse url_data.url url_data.params datos %}">{{ title }}</a>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {% for title, elements in button_url.items %}
+                                        {% for type, url_data in elements.items %}
+                                            {% if type == "modal" %}
+                                                <button hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target="#content_modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#general_modal" class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1">
+                                                    {{ title }}
+                                                </button>
+                                            {% elif type == "link" %}
+                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}">{{ title }}</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                                {% if button_inline %}
+                                    {% for title, elements in button_inline.items %}
+                                        {% for type, url_data in elements.items %}
+                                            {% if type == "link" %}
+                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}" title="{{ title }}">{{ title }}</a>
+                                            {% elif type == "modal" %}
+                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target='#modal-content' hx-trigger='click' data-bs-toggle='modal-remote' data-bs-target='#modal-remote'>{{ title }}</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="general_modal" class="modal modal-blur fade" aria-hidden="false" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="content_modal"></div>
+    </div>
+</div>
+<script>
+    document.getElementById('general_modal').addEventListener('show.bs.modal', function (event) {
+        document.getElementById('content_modal').innerHTML = '';
+    });
+</script>
+<script>
+    var table_id = "{{ table_id }}";
+    $(document).ready(function () {
+        var table = $('#'+table_id).DataTable({
+            responsive: {{responsive}},
+            paging: true,
+            order: {{ order|safe }},
+            language: {
+                "decimal": "",
+                "emptyTable": "No hay datos disponibles",
+                "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "",
+                "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "infoPostFix": "",
+                "thousands": ",",
+                "lengthMenu": "Mostrando _MENU_",
+                "loadingRecords": "Cargando...",
+                "processing": "",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros",
+            },
+            {% if column_search %}
+                initComplete: function () {
+                    var api = this.api();
+
+                    var cantidad_columnas = "{{ columns|length }}";
+                    var columnas_search = Array.from({ length: cantidad_columnas }, (_, i) => i);
+
+                    var searchRow = $('<tr class="search-row"></tr>').appendTo($(api.table().header()));
+                    api.columns().every(function (index, column) {
+                        var column = this;
+                        var title = $(column.header()).text();
+
+                        if (columnas_search.includes(index)) {
+                            var input = $('<input type="text" class="form-control input-group-sm" placeholder="Buscar ' + title + '" />').appendTo($('<th>').appendTo(searchRow));
+                            input.on('keyup change clear', function () {
+                                if (column.search() !== this.value) {
+                                    column.search(this.value).draw();
+                                }
+                            });
+                        }else{
+                            $('<th></th>').appendTo(searchRow);
+                        }
+                    });
+                }
+            {% endif %}
+        });
+    });
+</script>
