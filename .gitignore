@@ -1,0 +1,41 @@
+# Bytecode de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Entornos virtuales
+venv/
+.venv/
+.env/
+
+# Configuraciones de IDEs
+.idea/
+.vscode/
+
+# Bases de datos
+*.sqlite3
+
+# Archivos temporales o personales
+*.log
+*.tmp
+*.bak
+*.swp
+*.txt
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de build y distribución (para PyPI)
+build/
+dist/
+*.egg-info/
+
+# Archivos comprimidos
+*.tar.gz
+*.zip
+*.whl
+
+# Archivos de Django si incluyes pruebas o demos
+media/
+staticfiles/
