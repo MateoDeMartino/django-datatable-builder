@@ -38,7 +38,7 @@
     color: var(--bs-white); 
 } */
 .custom-datatable-scope .table tr.table-primary th{
-    background-color: purple !important; /* Uses Bootstrap's primary color */
+    background-color: dimgray !important; /* Uses Bootstrap's primary color */
     color: var(--bs-white); /* White text for contrast */
 } 
 
@@ -91,7 +91,6 @@
 }
 .custom-datatable-scope .fw-normal {
     font-weight: 400 !important;
-    color: red !important;
   }
 
 /* Overrides for DataTables default styling to better integrate with Bootstrap */
