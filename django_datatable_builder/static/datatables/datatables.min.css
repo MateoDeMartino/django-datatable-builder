@@ -37,7 +37,6 @@
     background-color: var(--bs-primary);
     color: var(--bs-white); 
 } */
-
 .custom-datatable-scope .table tr.table-primary th{
     background-color: purple !important; /* Uses Bootstrap's primary color */
     color: var(--bs-white); /* White text for contrast */
