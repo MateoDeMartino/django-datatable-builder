@@ -1,0 +1,32 @@
+[project]
+name = "django-datatable-builder"
+version = "0.1.0"
+description = "Componente reutilizable para generar datatables en Django con soporte para Bootstrap y acciones"
+authors = [
+    { name="Mateo", email="mateodemartino@email.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "django>=5.0"
+]
+classifiers = [
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/MateoDeMartino/django-datatable-builder"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["django_datatable_builder*"]
+
+[tool.setuptools]
+include-package-data = true
