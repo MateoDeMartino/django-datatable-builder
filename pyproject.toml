@@ -1,7 +1,7 @@
 [project]
 name = "django-datatable-builder"
 version = "0.1.0"
-description = "Componente reutilizable para generar datatables en Django con soporte para Bootstrap y acciones"
+description = "Componente reutilizable para generar datatables en Django con soporte para htmx y Bootstrap"
 authors = [
     { name="Mateo", email="mateodemartino@email.com" }
 ]
