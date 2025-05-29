@@ -1,0 +1,2 @@
+recursive-include django_datatable_builder/templates *.html
+recursive-include django_datatable_builder/static *
