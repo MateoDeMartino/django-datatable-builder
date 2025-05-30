@@ -56,10 +56,10 @@ def datatable_view(request):
         "button_dropdown": True,
         "button_url": {
             "Show_demo_1": {"link": {"url": "demo:datatable_view",}},
-            "Show_demo_2": {"modal": {"url": "demo:datatable_view","params":"dispositivo_id": "id"}}
+            "Show_demo_2": {"modal": {"url": "demo:datatable_view","params":"devices_id": "id"}}
         },
         "button_inline": {
-            "Show_demo_3": {"link": {"url": "demo:datatable_view", "params": {"dispositivo_id": "id"}}, "class": "btn btn-success float-end"},
+            "Show_demo_3": {"link": {"url": "demo:datatable_view", "params": {"devices_id": "id"}}, "class": "btn btn-success float-end"},
         },
     }
 
@@ -76,7 +76,6 @@ def datatable_view(request):
 ## 📚 Documentation
 
 ### **`DataTable` Parameters**
-
 
 These are the main configuration options used to initialize and render a dynamic datatable.
 
@@ -100,17 +99,17 @@ button_urls = {
     "Edit": {
         "modal": {
             "url": "/edit/",
-            "class": "btn btn-sm btn-primary",
             "params": {
                 "id": "id"  # Uses the 'id' from each row in `data`
             }
+            "class": "btn btn-sm btn-primary",
         }
     },
     "View": {
         "link": {
             "url": "/view/",
-            "class": "btn btn-sm btn-secondary"
         }
+        "class": "btn btn-sm btn-secondary"
     }
 }
 ```
