@@ -14,13 +14,18 @@
     <div class="table-responsive">
         <table id="{{ table_id }}" class="table card-table table-vcenter text-nowrap datatable table-striped" style="width:100%">
             <thead>
-                <tr class="table-primary">
+                <tr class="table-secondary">
                     {% if columns %}
-                        {% for columna in columns %}
-                            <th>{{ columna }}</th>
+                        {% for column in columns %}
+                            <th data-priority="2">{{ column|underscore_to_space }}</th>
                         {% endfor %}
+                        {% if columns_extra %}
+                            {% for column in columns_extra %}
+                                <th data-priority="3">{{ column|underscore_to_space }}</th>
+                            {% endfor %}
+                        {% endif %}
                         {% if button_url %}
-                            <th></th>
+                            <th data-priority="1"></th>
                         {% endif %}
                     {% else %}
                         <th><h6>No hay columnas</h6></th>
@@ -30,11 +35,17 @@
             <tbody>
                 {% for datos in data %}
                     <tr>
-                        {% for key, value in datos.items %}
-                            {% if key not in hidden %}
-                                <td class="fw-normal">{{ value|default_if_none:"-Sin Datos-" }}</td>
+                        {% for column in columns %}
+                            {% if column not in hidden %}
+                                <td class="fw-normal">{{ datos|get_item:column|default_if_none:"-Sin Datos-" }}</td>
                             {% endif %}
                         {% endfor %}
+                        {% if columns_extra %}
+                            {% for column in columns_extra %}
+                            <td class="fw-normal">{{ datos|get_item:column|default_if_none:"-Sin Datos-" }}</td>
+                            {% endfor %}
+                        {% endif %}
+
                         {% if button_url %}
                             <td>
                                 {% if button_dropdown %}
@@ -56,11 +67,11 @@
                                     {% for title, elements in button_url.items %}
                                         {% for type, url_data in elements.items %}
                                             {% if type == "modal" %}
-                                                <button hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target="#content_modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#general_modal" class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1">
+                                                    <button hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target="#content_modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#general_modal" class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-secondary float-end {% endif %} mx-1">
                                                     {{ title }}
                                                 </button>
                                             {% elif type == "link" %}
-                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}">{{ title }}</a>
+                                                    <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-secondary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}">{{ title }}</a>
                                             {% endif %}
                                         {% endfor %}
                                     {% endfor %}
@@ -69,9 +80,9 @@
                                     {% for title, elements in button_inline.items %}
                                         {% for type, url_data in elements.items %}
                                             {% if type == "link" %}
-                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}" title="{{ title }}">{{ title }}</a>
+                                                    <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-secondary float-end {% endif %} mx-1" href="{% dt_reverse url_data.url url_data.params datos %}" title="{{ title }}">{{ title }}</a>
                                             {% elif type == "modal" %}
-                                                <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-primary float-end {% endif %} mx-1" hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target='#modal-content' hx-trigger='click' data-bs-toggle='modal-remote' data-bs-target='#modal-remote'>{{ title }}</a>
+                                                    <a class="btn {% if elements.class %} {{ elements.class }} {% else %} btn btn-secondary float-end {% endif %} mx-1" hx-get="{% dt_reverse url_data.url url_data.params datos %}" hx-target='#modal-content' hx-trigger='click' data-bs-toggle='modal-remote' data-bs-target='#modal-remote'>{{ title }}</a>
                                             {% endif %}
                                         {% endfor %}
                                     {% endfor %}
@@ -98,7 +109,7 @@
     var table_id = "{{ table_id }}";
     $(document).ready(function () {
         var table = $('#'+table_id).DataTable({
-            responsive: {{responsive}},
+            responsive: true,
             paging: true,
             order: {{ order|safe }},
             language: {
@@ -119,24 +130,38 @@
                 initComplete: function () {
                     var api = this.api();
 
-                    var cantidad_columnas = "{{ columns|length }}";
+                    var cantidad_columnas = parseInt("{{ columns|length }}") + parseInt("{{ columns_extra|length }}");
                     var columnas_search = Array.from({ length: cantidad_columnas }, (_, i) => i);
 
                     var searchRow = $('<tr class="search-row"></tr>').appendTo($(api.table().header()));
+                    var searchInputs = [];
+                    
                     api.columns().every(function (index, column) {
                         var column = this;
                         var title = $(column.header()).text();
+                        var th = $('<th></th>').appendTo(searchRow);
 
                         if (columnas_search.includes(index)) {
-                            var input = $('<input type="text" class="form-control input-group-sm" placeholder="Buscar ' + title + '" />').appendTo($('<th>').appendTo(searchRow));
-                            input.on('keyup change clear', function () {
+                            var input = $('<input type="text" class="form-control input-group-sm" placeholder="Buscar ' + title + '" />')
+                                .appendTo(th)
+                                .on('keyup change clear', function () {
                                 if (column.search() !== this.value) {
                                     column.search(this.value).draw();
                                 }
                             });
+                            searchInputs.push({ index: index, input: input, th: th });
                         }else{
-                            $('<th></th>').appendTo(searchRow);
+                            searchInputs.push({ index: index, input: null, th: th });
                         }
+                    });
+                    api.on('responsive-resize', function (e, datatable, columnsVisible) {
+                        searchInputs.forEach(function (item, i) {
+                            if (columnsVisible[i]) {
+                                item.th.show();
+                            } else {
+                                item.th.hide();
+                        }
+                        });
                     });
                 }
             {% endif %}
