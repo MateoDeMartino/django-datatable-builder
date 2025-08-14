@@ -1,6 +1,6 @@
 [project]
 name = "django-datatable-builder"
-version = "0.1.3"
+version = "2.0.0"
 description = "Componente reutilizable para generar datatables en Django con soporte para htmx y Bootstrap"
 authors = [
     { name="Mateo", email="mateodemartino@email.com" }
