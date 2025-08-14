@@ -42,13 +42,15 @@ from django_datatable_builder import DataTable
 
 def datatable_view(request):
     devices = [
-        {"id": 1, "name": "Router", "status": "Active"},
-        {"id": 2, "name": "Switch", "status": "Inactive"},
+        {"id": 1, "Name": "Router", "Owner" : "Mateo", "Status": "Active"},
+        {"id": 2, "Name": "Switch", "Owner" : "Andres", "Status": "Inactive"},
+        {"id": 3, "Name": "Router", "Owner" : "Leo", "Status": "Inactive"},
     ]
 
     datatable_config = {
         "data": devices,
         "columns": ["Name", "Status"],
+        "columns_extra": ["Owner"],
         "hidden": ["id"],
         "order": [[0, "asc"]],
         "table_id": "devices_table",
@@ -82,13 +84,14 @@ These are the main configuration options used to initialize and render a dynamic
 | Parameter         | Description                                                                                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`data`**            | A Django `QuerySet` or a `list` of dictionaries. This is the source of the table content.                                                                          |
-| **`columns`**         | A list of column names. **Order must match** the order of fields in `data`.                                                                                        |
+| **`columns`**         | A list of column names. **Names must match** the names of fields in `data`.                                                                                        |
+| **`columns_extra`**   | A list of column names. **Names must match** the names of fields in data. |
 | **`hidden`**          | A list of field names to **hide from the table**. Useful for keeping some values available in HTML without displaying them.                                        |
-| **`order`**           | Default ordering of the table. Format: `[[column_index, "asc" or "desc"]]` — e.g., `[[0, "asc"]]`.                                                                 |
+| **`order`**           | Default ordering of the table. Format: `[[column_index, "asc" or "desc"]]` — e.g., `[[0, "asc"],[1,"desc"]]`.                                                                 |
 | **`table_id`**        | The HTML `id` attribute of the table. Required for JavaScript initialization.                                                                                      |
-| **`column_search`**   | A list of field names that should support **column-specific search**.                                                                                              |
+| **`column_search`**   | Set to `True` or `False` depending if you want search boxes.                                                                                              |
 | **`button_dropdown`** | Set to `true` or `false` depending on whether you want to show a dropdown with action buttons per row.                                                             |
-| **`button_urls`**     | Used with `button_dropdown`. Defines one or more buttons with types like `"link"` or `"modal"`. Supports optional `class`, and `params`. See example below. |
+| **`button_urls`**     | Used with `button_dropdown`. Defines one or more buttons with types like `"link"` or `"modal"`. Supports optional `class`(by default style are from bootstrap 5), and `params`. See example below. |
 | **`button_inline`**   | Used for inline buttons (outside dropdowns). Structure is similar to `button_urls`. Useful if you want more flexibility with custom buttons.                       |
 
 
